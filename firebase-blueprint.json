@@ -1,0 +1,285 @@
+{
+  "entities": {
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "Platillo del catálogo del restaurante Slime Craft Burgers con opciones personalizables y promoción.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Nombre del platillo"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["burgers", "combos", "sides", "drinks", "sauces"],
+          "description": "Categoría del menú"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 260,
+          "description": "Descripción gastronómica e ingredientes principales"
+        },
+        "priceMxn": {
+          "type": "number",
+          "description": "Precio actual en pesos mexicanos (MXN)"
+        },
+        "originalPriceMxn": {
+          "type": "number",
+          "description": "Precio regular de referencia antes de combo o promo"
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Ruta local o URL de la fotografía del platillo"
+        },
+        "promoType": {
+          "type": "string",
+          "enum": ["none", "2x1", "combo", "favorite"],
+          "description": "Etiqueta táctica o promoción aplicable"
+        },
+        "available": {
+          "type": "boolean",
+          "description": "Disponibilidad en tiempo real del platillo"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Indica si destaca en la vitrina principal"
+        },
+        "caloriesLabel": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Etiqueta de porción o calorías (ej. Doble 180g)"
+        },
+        "defaultIngredients": {
+          "type": "array",
+          "description": "Lista acotada (máx 12) de ingredientes base removibles"
+        },
+        "extraOptions": {
+          "type": "array",
+          "description": "Lista acotada (máx 12) de modificadores/extras con precio MXN"
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "Orden de visualización en la categoría"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Marca de tiempo de creación del servidor"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Marca de tiempo de última actualización del servidor"
+        }
+      },
+      "required": [
+        "name",
+        "category",
+        "description",
+        "priceMxn",
+        "imageUrl",
+        "promoType",
+        "available",
+        "featured",
+        "caloriesLabel",
+        "defaultIngredients",
+        "extraOptions",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Pedido confirmado por un cliente con seguimiento en vivo desde cocina y aislamiento de PII.",
+      "type": "object",
+      "properties": {
+        "orderCode": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 12,
+          "pattern": "^SC-[0-9]{4}$",
+          "description": "Folio legible del pedido"
+        },
+        "customerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID del cliente propietario en Firebase Auth"
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Nombre del cliente o alias"
+        },
+        "fulfillmentType": {
+          "type": "string",
+          "enum": ["dine_in", "pickup", "delivery"],
+          "description": "Modalidad de entrega"
+        },
+        "tableOrAddress": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 180,
+          "description": "Número de mesa, hora de recolección o dirección de entrega"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 240,
+          "description": "Instrucciones especiales para cocina"
+        },
+        "items": {
+          "type": "array",
+          "description": "Renglones del pedido (1 a 25 artículos)"
+        },
+        "subtotalMxn": {
+          "type": "number",
+          "description": "Subtotal antes de descuentos"
+        },
+        "discountMxn": {
+          "type": "number",
+          "description": "Descuento total por promociones 2x1 o combos"
+        },
+        "discountLabel": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Descripción del descuento aplicado"
+        },
+        "totalMxn": {
+          "type": "number",
+          "description": "Total final a pagar en MXN"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["received", "crafting", "grill", "ready", "delivered", "cancelled"],
+          "description": "Estado en tiempo real del pedido"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp de creación"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp de última actualización"
+        }
+      },
+      "required": [
+        "orderCode",
+        "customerId",
+        "customerName",
+        "fulfillmentType",
+        "tableOrAddress",
+        "notes",
+        "items",
+        "subtotalMxn",
+        "discountMxn",
+        "discountLabel",
+        "totalMxn",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StorefrontSettings": {
+      "title": "StorefrontSettings",
+      "description": "Configuración operativa pública del restaurante (sin PII).",
+      "type": "object",
+      "properties": {
+        "restaurantName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Nombre público del restaurante"
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 15,
+          "pattern": "^[0-9]{10,15}$",
+          "description": "Número WhatsApp del local en formato internacional sin signos"
+        },
+        "promoBannerText": {
+          "type": "string",
+          "maxLength": 180,
+          "description": "Mensaje del cintillo promocional superior"
+        },
+        "promoActive": {
+          "type": "boolean",
+          "description": "Mostrar u ocultar cintillo promocional"
+        },
+        "isOpen": {
+          "type": "boolean",
+          "description": "Indica si la cocina está aceptando pedidos"
+        },
+        "prepTimeEstimate": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Tiempo estimado de preparación (ej. 15–20 min)"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp de última modificación"
+        }
+      },
+      "required": [
+        "restaurantName",
+        "whatsappNumber",
+        "promoBannerText",
+        "promoActive",
+        "isOpen",
+        "prepTimeEstimate",
+        "updatedAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Registro de operadores autorizados para el panel de cocina y editor de menú.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Correo electrónico del operador"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "kitchen"],
+          "description": "Rol operativo"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp de alta"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/menuItems/{itemId}": {
+      "schema": { "$ref": "#/entities/MenuItem" },
+      "description": "Catálogo público de platillos administrado por cocina/admin"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Pedidos activos e históricos con aislamiento de PII por dueño y admin"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StorefrontSettings" },
+      "description": "Configuración pública de tienda (documento storefront)"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Lista confiable de administradores adicionales"
+    }
+  }
+}

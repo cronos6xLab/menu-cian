@@ -1,0 +1,6 @@
+{
+  "name": "Slime Craft Burgers",
+  "description": "Menú digital de smash burgers artesanales estilo Toxic Slime Craft con personalizador de ingredientes, motor 2x1 en MXN, pedidos por WhatsApp, seguimiento en vivo y panel de cocina.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

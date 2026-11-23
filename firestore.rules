@@ -1,0 +1,226 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Primitive Helpers ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerified() && request.auth.token.email == 'cronos6xlab@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+        (isVerified() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // --- Validation Blueprints (Synchronized with firebase-blueprint.json) ---
+    function isValidMenuItem(data) {
+      return data.keys().hasAll([
+          'name', 'category', 'description', 'priceMxn', 'imageUrl',
+          'promoType', 'available', 'featured', 'caloriesLabel',
+          'defaultIngredients', 'extraOptions', 'sortOrder', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name', 'category', 'description', 'priceMxn', 'originalPriceMxn',
+          'imageUrl', 'promoType', 'available', 'featured', 'caloriesLabel',
+          'defaultIngredients', 'extraOptions', 'sortOrder', 'createdAt', 'updatedAt'
+        ])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 80
+        && data.category is string && data.category in ['burgers', 'combos', 'sides', 'drinks', 'sauces']
+        && data.description is string && data.description.size() >= 4 && data.description.size() <= 260
+        && data.priceMxn is number && data.priceMxn > 0 && data.priceMxn <= 5000
+        && (!('originalPriceMxn' in data) || (data.originalPriceMxn is number && data.originalPriceMxn >= 0 && data.originalPriceMxn <= 5000))
+        && data.imageUrl is string && data.imageUrl.size() <= 500
+        && data.promoType is string && data.promoType in ['none', '2x1', 'combo', 'favorite']
+        && data.available is bool
+        && data.featured is bool
+        && data.caloriesLabel is string && data.caloriesLabel.size() <= 40
+        && data.defaultIngredients is list && data.defaultIngredients.size() <= 12
+        && (data.defaultIngredients.size() == 0 || (data.defaultIngredients[0] is string && data.defaultIngredients[0].size() <= 60))
+        && data.extraOptions is list && data.extraOptions.size() <= 12
+        && (data.extraOptions.size() == 0 || data.extraOptions[0] is map)
+        && data.sortOrder is number && data.sortOrder >= 0 && data.sortOrder <= 999
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'orderCode', 'customerId', 'customerName', 'fulfillmentType',
+          'tableOrAddress', 'notes', 'items', 'subtotalMxn', 'discountMxn',
+          'discountLabel', 'totalMxn', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'orderCode', 'customerId', 'customerName', 'fulfillmentType',
+          'tableOrAddress', 'notes', 'items', 'subtotalMxn', 'discountMxn',
+          'discountLabel', 'totalMxn', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.orderCode is string && data.orderCode.size() >= 7 && data.orderCode.size() <= 12 && data.orderCode.matches('^SC-[0-9]{4}$')
+        && data.customerId is string && isValidId(data.customerId)
+        && data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 80
+        && data.fulfillmentType is string && data.fulfillmentType in ['dine_in', 'pickup', 'delivery']
+        && data.tableOrAddress is string && data.tableOrAddress.size() >= 1 && data.tableOrAddress.size() <= 180
+        && data.notes is string && data.notes.size() <= 240
+        && data.items is list && data.items.size() >= 1 && data.items.size() <= 25
+        && data.items[0] is map
+        && data.subtotalMxn is number && data.subtotalMxn >= 0 && data.subtotalMxn <= 50000
+        && data.discountMxn is number && data.discountMxn >= 0 && data.discountMxn <= 50000
+        && data.discountLabel is string && data.discountLabel.size() <= 120
+        && data.totalMxn is number && data.totalMxn >= 0 && data.totalMxn <= 50000
+        && data.status is string && data.status in ['received', 'crafting', 'grill', 'ready', 'delivered', 'cancelled']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidStorefrontSettings(data) {
+      return data.keys().hasAll([
+          'restaurantName', 'whatsappNumber', 'promoBannerText',
+          'promoActive', 'isOpen', 'prepTimeEstimate', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'restaurantName', 'whatsappNumber', 'promoBannerText',
+          'promoActive', 'isOpen', 'prepTimeEstimate', 'updatedAt'
+        ])
+        && data.restaurantName is string && data.restaurantName.size() >= 2 && data.restaurantName.size() <= 80
+        && data.whatsappNumber is string && data.whatsappNumber.size() >= 10 && data.whatsappNumber.size() <= 15 && data.whatsappNumber.matches('^[0-9]{10,15}$')
+        && data.promoBannerText is string && data.promoBannerText.size() <= 180
+        && data.promoActive is bool
+        && data.isOpen is bool
+        && data.prepTimeEstimate is string && data.prepTimeEstimate.size() <= 40
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdminUser(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt'])
+        && data.keys().hasOnly(['email', 'role', 'createdAt'])
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 120
+        && data.role is string && data.role in ['admin', 'kitchen']
+        && data.createdAt is timestamp;
+    }
+
+    function isCustomerCancelAction() {
+      return existing().customerId == request.auth.uid
+        && existing().status == 'received'
+        && incoming().status == 'cancelled'
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+    }
+
+    function isKitchenAdvanceAction() {
+      return isAdmin()
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+    }
+
+    // --- Collection: menuItems (Public Non-PII Catalog, Admin Write) ---
+    match /menuItems/{itemId} {
+      allow get: if isValidId(itemId);
+      allow list: if true;
+      allow create: if isVerified()
+        && isValidId(itemId)
+        && isValidMenuItem(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+      allow update: if isVerified()
+        && isValidId(itemId)
+        && isValidMenuItem(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'category', 'description', 'priceMxn', 'originalPriceMxn',
+          'imageUrl', 'promoType', 'available', 'featured', 'caloriesLabel',
+          'defaultIngredients', 'extraOptions', 'sortOrder', 'updatedAt'
+        ])
+        && isAdmin();
+      allow delete: if isVerified() && isValidId(itemId) && isAdmin();
+    }
+
+    // --- Collection: orders (PII Isolated, Owner + Kitchen/Admin) ---
+    match /orders/{orderId} {
+      allow get: if isVerified()
+        && isValidId(orderId)
+        && (existing().customerId == request.auth.uid || isAdmin());
+      allow list: if isVerified()
+        && (existing().customerId == request.auth.uid || isBootstrappedAdmin());
+      allow create: if isVerified()
+        && isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().customerId == request.auth.uid
+        && incoming().status == 'received'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerified()
+        && isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().customerId == existing().customerId
+        && incoming().orderCode == existing().orderCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isKitchenAdvanceAction() ||
+          (!(existing().status in ['delivered', 'cancelled']) && isCustomerCancelAction())
+        );
+      allow delete: if isVerified() && isValidId(orderId) && isAdmin();
+    }
+
+    // --- Collection: settings (Public Storefront Config, Admin Write) ---
+    match /settings/{settingId} {
+      allow get: if settingId == 'storefront';
+      allow list: if false;
+      allow create: if isVerified()
+        && settingId == 'storefront'
+        && isValidStorefrontSettings(incoming())
+        && incoming().updatedAt == request.time
+        && isAdmin();
+      allow update: if isVerified()
+        && settingId == 'storefront'
+        && isValidStorefrontSettings(incoming())
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'restaurantName', 'whatsappNumber', 'promoBannerText',
+          'promoActive', 'isOpen', 'prepTimeEstimate', 'updatedAt'
+        ])
+        && isAdmin();
+      allow delete: if false;
+    }
+
+    // --- Collection: admins (Trusted Operator Registry) ---
+    match /admins/{adminId} {
+      allow get: if isVerified() && isValidId(adminId) && (request.auth.uid == adminId || isBootstrappedAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isBootstrappedAdmin()
+        && isValidId(adminId)
+        && isValidAdminUser(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isBootstrappedAdmin()
+        && isValidId(adminId)
+        && isValidAdminUser(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['role', 'email']);
+      allow delete: if isBootstrappedAdmin() && isValidId(adminId);
+    }
+  }
+}
