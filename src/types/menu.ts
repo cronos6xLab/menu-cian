@@ -1,4 +1,11 @@
-export type MenuCategory = 'burgers' | 'combos' | 'sides' | 'drinks' | 'sauces';
+export type MenuCategory =
+  | 'burgers'
+  | 'burgers_papas'
+  | 'combos'
+  | 'sandwiches'
+  | 'papas_especiales'
+  | 'papas_fritas'
+  | 'bebidas';
 
 export type PromoType = 'none' | '2x1' | 'combo' | 'favorite';
 

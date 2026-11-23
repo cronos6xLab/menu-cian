@@ -50,7 +50,11 @@ service cloud.firestore {
           'defaultIngredients', 'extraOptions', 'sortOrder', 'createdAt', 'updatedAt'
         ])
         && data.name is string && data.name.size() >= 2 && data.name.size() <= 80
-        && data.category is string && data.category in ['burgers', 'combos', 'sides', 'drinks', 'sauces']
+        && data.category is string && data.category in [
+          'burgers', 'burgers_papas', 'combos', 'sandwiches',
+          'papas_especiales', 'papas_fritas', 'bebidas',
+          'sides', 'drinks', 'sauces'
+        ]
         && data.description is string && data.description.size() >= 4 && data.description.size() <= 260
         && data.priceMxn is number && data.priceMxn > 0 && data.priceMxn <= 5000
         && (!('originalPriceMxn' in data) || (data.originalPriceMxn is number && data.originalPriceMxn >= 0 && data.originalPriceMxn <= 5000))

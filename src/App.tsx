@@ -15,7 +15,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { auth, BOOTSTRAPPED_ADMIN_EMAIL, db, googleProvider } from './firebase';
-import { DEFAULT_STOREFRONT_SETTINGS, SEED_MENU_ITEMS } from './data/seedMenu';
+import { DEFAULT_STOREFRONT_SETTINGS, SEED_MENU_ITEMS, STORE_INFO } from './data/seedMenu';
 import { handleFirestoreError, OperationType } from './lib/firestoreErrors';
 import {
   buildCartKey,
@@ -41,6 +41,7 @@ import { CraftingModal } from './components/CraftingModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OrderTrackerView } from './components/OrderTrackerView';
 import { KitchenAdminView } from './components/KitchenAdminView';
+import { RadioactiveBucketsOverlay } from './components/RadioactiveBucketsOverlay';
 
 const CART_STORAGE_KEY = 'slime_craft_cart_v1';
 
@@ -470,13 +471,22 @@ export default function App() {
     [showToast]
   );
 
-  // Admin Seed Initial Catalog + Storefront Settings
+  // Admin Seed / Sync Official 34-Item Cianuro Burger BL Catalog + Storefront Settings
   const handleSeedCatalog = useCallback(async () => {
     const path = 'menuItems';
     try {
       const batch = writeBatch(db);
+      const validIds = new Set(SEED_MENU_ITEMS.map((i) => i.id));
+      const existingIds = new Set(firestoreMenu.map((m) => m.id));
+
+      for (const existing of firestoreMenu) {
+        if (!validIds.has(existing.id)) {
+          batch.delete(doc(db, 'menuItems', existing.id));
+        }
+      }
+
       for (const item of SEED_MENU_ITEMS) {
-        const payload: Record<string, unknown> = {
+        const updatePayload: Record<string, unknown> = {
           name: item.name,
           category: item.category,
           description: item.description,
@@ -489,13 +499,20 @@ export default function App() {
           defaultIngredients: item.defaultIngredients,
           extraOptions: item.extraOptions,
           sortOrder: item.sortOrder,
-          createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         };
         if (item.originalPriceMxn !== undefined) {
-          payload.originalPriceMxn = item.originalPriceMxn;
+          updatePayload.originalPriceMxn = item.originalPriceMxn;
         }
-        batch.set(doc(db, 'menuItems', item.id), payload);
+
+        if (existingIds.has(item.id)) {
+          batch.update(doc(db, 'menuItems', item.id), updatePayload);
+        } else {
+          batch.set(doc(db, 'menuItems', item.id), {
+            ...updatePayload,
+            createdAt: serverTimestamp(),
+          });
+        }
       }
 
       batch.set(doc(db, 'settings', 'storefront'), {
@@ -504,11 +521,11 @@ export default function App() {
       });
 
       await batch.commit();
-      showToast('Catálogo inicial de 12 platillos guardado en Firestore.');
+      showToast(`Menú oficial de Cianuro Burger BL (${SEED_MENU_ITEMS.length} platillos) sincronizado.`);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }
-  }, [showToast]);
+  }, [firestoreMenu, showToast]);
 
   // Admin Create / Update Menu Item
   const handleSaveMenuItem = useCallback(
@@ -639,7 +656,10 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0D0D11] text-[#E4E1E6] flex flex-col">
+    <div className="min-h-screen mc-bg-grid text-[#E4E1E6] flex flex-col relative">
+      {/* Top-left & Top-right Minecraft Buckets pouring radioactive liquid */}
+      <RadioactiveBucketsOverlay />
+
       <Navbar
         restaurantName={settings.restaurantName}
         activeView={activeView}
@@ -706,30 +726,52 @@ export default function App() {
         )}
       </main>
 
-      {/* Clean Minimal Footer */}
-      <footer className="border-t border-[#27272A] bg-[#0D0D11] py-8 mt-auto">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#869585]">
-          <p className="font-display font-bold text-[#BCCBB9]">
-            {settings.restaurantName} · Smash Burgers Artesanales
-          </p>
-          <div className="flex items-center gap-4">
-            <span>Precios en MXN con IVA incluido</span>
-            <span aria-hidden="true">·</span>
-            <button
-              type="button"
-              onClick={() => setActiveView('tracker')}
-              className="hover:text-[#E4E1E6] transition-colors cursor-pointer"
-            >
-              Rastrear Pedido
-            </button>
-            <span aria-hidden="true">·</span>
-            <button
-              type="button"
-              onClick={() => setActiveView('kitchen')}
-              className="hover:text-[#E4E1E6] transition-colors cursor-pointer"
-            >
-              Panel Cocina
-            </button>
+      {/* Cianuro Burger BL Footer */}
+      <footer className="border-t-2 border-[#262933] bg-[#0A0B0E] py-10 mt-auto">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs text-[#869585]">
+          <div className="space-y-2">
+            <p className="font-pixel text-sm font-bold text-[#4BE277]">
+              {settings.restaurantName}
+            </p>
+            <p className="leading-relaxed text-[#BCCBB9]">
+              Smash burgers artesanales con estética Minecraft radioactiva, brioche dorado y promos
+              2X1 automáticas.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="font-display font-bold text-[#4BE277] uppercase">Horarios y Sede</p>
+            <p className="text-[#BCCBB9]">{STORE_INFO.address}</p>
+            <p>{STORE_INFO.hours}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="font-display font-bold text-[#4BE277] uppercase">Servicio Delivery</p>
+            <p className="text-[#BCCBB9]">
+              Envío gratis a partir de ${STORE_INFO.freeDeliveryMinMxn} MXN.
+            </p>
+            <p>Tiempo promedio de preparación: {settings.prepTimeEstimate}.</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="font-display font-bold text-[#4BE277] uppercase">Accesos Rápidos</p>
+            <div className="flex flex-col items-start gap-1.5">
+              <button
+                type="button"
+                onClick={() => setActiveView('tracker')}
+                className="text-[#BCCBB9] hover:text-[#4BE277] transition-colors cursor-pointer"
+              >
+                Rastrear mi pedido en vivo
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveView('kitchen')}
+                className="text-[#BCCBB9] hover:text-[#FACC15] transition-colors cursor-pointer"
+              >
+                Panel de Cocina y Editor
+              </button>
+              <span>Precios en MXN con IVA incluido</span>
+            </div>
           </div>
         </div>
       </footer>

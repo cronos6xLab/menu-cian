@@ -13,8 +13,16 @@
         },
         "category": {
           "type": "string",
-          "enum": ["burgers", "combos", "sides", "drinks", "sauces"],
-          "description": "Categoría del menú"
+          "enum": [
+            "burgers",
+            "burgers_papas",
+            "combos",
+            "sandwiches",
+            "papas_especiales",
+            "papas_fritas",
+            "bebidas"
+          ],
+          "description": "Categoría del menú de Cianuro Burger BL"
         },
         "description": {
           "type": "string",

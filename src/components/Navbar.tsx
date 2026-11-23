@@ -29,13 +29,13 @@ export function Navbar({
   const isPromosActive = activeView === 'menu' && activeCategory === 'promo_2x1';
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0D0D11]/95 backdrop-blur-md border-b border-[#27272A]">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-10 h-16 flex items-center justify-between gap-4 md:gap-8">
+    <header className="sticky top-0 z-40 bg-[#0A0B0E]/95 backdrop-blur-md border-b-2 border-[#1F3D25]">
+      <div className="max-w-[1440px] mx-auto px-14 sm:px-20 md:px-24 h-16 flex items-center justify-between gap-4 md:gap-8">
         {/* Zone 1: Single-element Brand Wordmark */}
         <button
           type="button"
           onClick={() => onSelectView('menu')}
-          className="font-display text-lg md:text-xl font-bold tracking-tight text-[#E4E1E6] hover:text-[#4BE277] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#22C55E] focus-visible:outline-offset-4"
+          className="font-pixel text-sm sm:text-base md:text-lg font-bold tracking-tight text-[#4BE277] hover:text-[#6BFF8F] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#22C55E] focus-visible:outline-offset-4 drop-shadow-[0_0_10px_rgba(34,197,94,0.35)]"
         >
           {restaurantName}
         </button>
@@ -48,7 +48,7 @@ export function Navbar({
           <button
             type="button"
             onClick={() => onSelectView('menu')}
-            className={`text-sm font-medium py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`text-xs md:text-sm font-display font-bold py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               isMenuActive
                 ? 'text-[#4BE277] border-[#22C55E]'
                 : 'text-[#BCCBB9] border-transparent hover:text-[#E4E1E6]'
@@ -59,7 +59,7 @@ export function Navbar({
           <button
             type="button"
             onClick={onSelectPromos}
-            className={`text-sm font-medium py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`text-xs md:text-sm font-display font-bold py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               isPromosActive
                 ? 'text-[#EF4444] border-[#EF4444]'
                 : 'text-[#BCCBB9] border-transparent hover:text-[#E4E1E6]'
@@ -70,7 +70,7 @@ export function Navbar({
           <button
             type="button"
             onClick={() => onSelectView('tracker')}
-            className={`text-sm font-medium py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`text-xs md:text-sm font-display font-bold py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               activeView === 'tracker'
                 ? 'text-[#4BE277] border-[#22C55E]'
                 : 'text-[#BCCBB9] border-transparent hover:text-[#E4E1E6]'
@@ -81,7 +81,7 @@ export function Navbar({
           <button
             type="button"
             onClick={() => onSelectView('kitchen')}
-            className={`text-sm font-medium py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`text-xs md:text-sm font-display font-bold py-1 border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               activeView === 'kitchen'
                 ? 'text-[#FACC15] border-[#FACC15]'
                 : 'text-[#BCCBB9] border-transparent hover:text-[#E4E1E6]'
@@ -91,21 +91,21 @@ export function Navbar({
           </button>
         </nav>
 
-        {/* Zone 3: Single Primary Action (Cart CTA) */}
+        {/* Zone 3: Single Primary Action (Chest Cart CTA) */}
         <div className="shrink-0">
           <button
             type="button"
             onClick={onOpenCart}
-            aria-label={`Abrir carrito con ${cartCount} artículos`}
-            className={`inline-flex items-center gap-2.5 px-3.5 md:px-4 py-2 rounded font-display font-bold text-sm transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#4BE277] focus-visible:outline-offset-2 ${
+            aria-label={`Abrir cofre de pedido con ${cartCount} artículos`}
+            className={`inline-flex items-center gap-2 px-3 md:px-4 py-2 rounded font-display font-bold text-xs md:text-sm transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#4BE277] focus-visible:outline-offset-2 ${
               cartCount > 0
-                ? 'bg-[#22C55E] text-[#002109] hover:bg-[#4BE277] slime-glow'
-                : 'bg-[#18181B] text-[#E4E1E6] border border-[#27272A] hover:border-[#22C55E]'
+                ? 'mc-btn-green'
+                : 'bg-[#16181E] text-[#E4E1E6] border-2 border-[#27272A] hover:border-[#22C55E]'
             }`}
           >
             <ShoppingBag className="w-4 h-4 shrink-0" />
             <span className="tabular-nums">
-              {cartCount > 0 ? `${cartCount} · ${formatMxn(cartTotalMxn)}` : 'Carrito'}
+              {cartCount > 0 ? `${cartCount} · ${formatMxn(cartTotalMxn)}` : 'Cofre'}
             </span>
           </button>
         </div>

@@ -2,14 +2,16 @@
 
 @theme {
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-pixel: "Silkscreen", "Space Grotesk", ui-monospace, monospace;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-void: #0D0D11;
-  --color-surface: #131316;
-  --color-slate-card: #18181B;
-  --color-slate-elevated: #27272A;
+  --color-void: #0A0B0E;
+  --color-surface: #121318;
+  --color-slate-card: #16181E;
+  --color-slate-elevated: #23262F;
   --color-slime: #22C55E;
   --color-slime-bright: #4BE277;
+  --color-slime-neon: #6BFF8F;
   --color-slime-ink: #002109;
   --color-hazard: #FACC15;
   --color-hazard-ink: #231B00;
@@ -17,12 +19,12 @@
   --color-ink: #E4E1E6;
   --color-ink-muted: #BCCBB9;
   --color-outline-soft: #27272A;
-  --color-outline-slime: #3D4A3D;
+  --color-outline-slime: #2D5A36;
 }
 
 @layer base {
   html {
-    background-color: #0D0D11;
+    background-color: #0A0B0E;
     color: #E4E1E6;
     font-family: var(--font-sans);
     scroll-behavior: smooth;
@@ -31,22 +33,69 @@
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
   }
+
+  .font-pixel {
+    font-family: var(--font-pixel);
+  }
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-.voxel-bevel {
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(0, 0, 0, 0.65);
+/* Subtle Minecraft obsidian pixel-block background pattern */
+.mc-bg-grid {
+  background-color: #0A0B0E;
+  background-image:
+    linear-gradient(to right, rgba(34, 197, 94, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(34, 197, 94, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Minecraft inventory stone block bevel */
+.voxel-bevel,
+.mc-panel {
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.06),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.72);
+}
+
+/* Recessed Minecraft inventory slot */
+.mc-slot {
+  background-color: #0D0E12;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.85),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Tactile Minecraft radioactive emerald button */
+.mc-btn-green {
+  background-color: #22C55E;
+  color: #002109;
+  box-shadow:
+    inset 2px 2px 0 #6BFF8F,
+    inset -2px -2px 0 #15803D,
+    0 0 14px rgba(34, 197, 94, 0.3);
+}
+
+.mc-btn-green:hover {
+  background-color: #4BE277;
+  box-shadow:
+    inset 2px 2px 0 #86EFAC,
+    inset -2px -2px 0 #16A34A,
+    0 0 20px rgba(75, 226, 119, 0.48);
+}
+
+.mc-btn-green:active {
+  transform: translateY(1px);
 }
 
 .slime-glow {
-  box-shadow: 0 0 18px rgba(34, 197, 94, 0.32);
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.36);
 }
 
 .critical-glow {
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.38);
 }
 
 .hazard-stripes {
@@ -54,9 +103,80 @@
     -45deg,
     #FACC15,
     #FACC15 10px,
-    #0D0D11 10px,
-    #0D0D11 20px
+    #0A0B0E 10px,
+    #0A0B0E 20px
   );
+}
+
+/* Minecraft radioactive bucket pour & falling pixel drop animations (compositor-only) */
+@keyframes slimeFallFast {
+  0% {
+    transform: translateY(0px);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(150px);
+    opacity: 0;
+  }
+}
+
+@keyframes slimeFallSlow {
+  0% {
+    transform: translateY(0px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(195px);
+    opacity: 0;
+  }
+}
+
+@keyframes slimeStreamShimmer {
+  0%, 100% {
+    opacity: 0.88;
+    filter: drop-shadow(0 0 8px rgba(75, 226, 119, 0.6));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 14px rgba(107, 255, 143, 0.9));
+  }
+}
+
+.animate-slime-fall-1 {
+  animation: slimeFallFast 2.2s linear infinite;
+}
+
+.animate-slime-fall-2 {
+  animation: slimeFallSlow 2.9s linear infinite 0.7s;
+}
+
+.animate-slime-fall-3 {
+  animation: slimeFallFast 2.6s linear infinite 1.3s;
+}
+
+.animate-slime-glow {
+  animation: slimeStreamShimmer 2.8s ease-in-out infinite;
+}
+
+/* Hide scrollbars cleanly where horizontal hotbars scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Custom subtle dark scrollbar */
@@ -66,16 +186,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0D0D11;
+  background: #0A0B0E;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #27272A;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D4A3D;
+  background: #22C55E;
 }
 
 @media (prefers-reduced-motion: reduce) {

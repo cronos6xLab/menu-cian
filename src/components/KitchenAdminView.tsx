@@ -432,18 +432,18 @@ export function KitchenAdminView({
         </div>
       </div>
 
-      {/* Prompt to seed Firestore if menuItems collection is currently empty */}
-      {firestoreMenuCount === 0 && (
-        <div className="p-4 rounded-lg bg-[#18181B] border border-[#FACC15]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Prompt to seed or sync official 34-item Cianuro Burger BL catalog in Firestore */}
+      {firestoreMenuCount < 30 && (
+        <div className="p-4 rounded-lg bg-[#14161C] border-2 border-[#FACC15]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <Database className="w-5 h-5 text-[#FACC15] shrink-0 mt-0.5" />
             <div>
               <p className="font-display text-sm font-bold text-[#E4E1E6]">
-                Tu base de datos Firestore aún no tiene el catálogo guardado
+                Sincronizar menú oficial de Cianuro Burger BL en Firestore
               </p>
               <p className="text-xs text-[#BCCBB9] mt-0.5">
-                Actualmente se muestra la carta base de demostración. Guárdala en Firestore con un
-                clic para editar precios, disponibilidad y promociones en tiempo real.
+                Carga los 34 platillos reales de Cianuro Burger BL (Burgers, Con Papas, Combos,
+                Sandwiches, Papas Especiales y Bebidas) en tu base de datos con un clic.
               </p>
             </div>
           </div>
@@ -451,9 +451,9 @@ export function KitchenAdminView({
             type="button"
             disabled={seeding}
             onClick={handleSeed}
-            className="px-4 py-2.5 bg-[#FACC15] text-[#231B00] hover:bg-[#FFE083] font-display font-bold text-xs rounded transition-colors cursor-pointer whitespace-nowrap shrink-0"
+            className="px-4 py-2.5 bg-[#FACC15] text-[#231B00] hover:bg-[#FFE083] font-display font-bold text-xs rounded-sm transition-colors cursor-pointer whitespace-nowrap shrink-0"
           >
-            {seeding ? 'Guardando catálogo...' : 'Cargar 12 platillos en Firestore'}
+            {seeding ? 'Sincronizando menú...' : 'Cargar 34 platillos oficiales'}
           </button>
         </div>
       )}
@@ -677,11 +677,13 @@ export function KitchenAdminView({
                     onChange={(e) => setCategory(e.target.value as MenuCategory)}
                     className="w-full h-11 px-3 bg-[#0D0D11] border border-[#27272A] focus:border-[#22C55E] focus:outline-none rounded text-sm text-[#E4E1E6]"
                   >
-                    <option value="burgers">Smash Burgers</option>
-                    <option value="combos">Combos Tácticos</option>
-                    <option value="sides">Papas & Loot</option>
-                    <option value="drinks">Pociones & Shakes</option>
-                    <option value="sauces">Salsas Radiactivas</option>
+                    <option value="burgers">Burgers (Sencillas)</option>
+                    <option value="burgers_papas">Burgers con Papas</option>
+                    <option value="combos">Combos con Refresco</option>
+                    <option value="sandwiches">Sandwiches</option>
+                    <option value="papas_especiales">Papas Especiales</option>
+                    <option value="papas_fritas">Papas Fritas & Aros</option>
+                    <option value="bebidas">Bebidas</option>
                   </select>
                 </div>
 
